@@ -1,0 +1,92 @@
+esphome:
+  name: espp
+  friendly_name: espp
+  on_boot:
+    if:
+      condition:
+        wifi.connected:
+      then:
+        - logger.log: WiFi is connected!
+        - switch.turn_on: switch_D2
+        - delay: 1s
+        - switch.turn_off: switch_D2
+
+esp8266:
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "HpIq5qkKXlFk3J94+2Hjsvvm90cIDmtnYhAWScd44QI="
+
+ota:
+  password: "eefae5be68f0fbba0cd0f90da436d576"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Espp Fallback Hotspot"
+    password: "AxHDFWGIBpEE"
+
+
+
+captive_portal:
+
+switch:   #HA -) ESP -) Pin
+  - platform: gpio
+    pin: D4 #Internal LED switching
+    name: "Internal LED"
+    id: internal_led
+  - platform: gpio
+    pin: D2
+    name: "BUZZER"
+    id: switch_D2
+  - platform: gpio
+    pin: D3
+    name: "MIRROR SWITCH"
+    id: switch_D3
+  - platform: gpio
+    pin: D5
+    name: "Main LIGHT SWITCH"
+    id: switch_D5
+  - platform: gpio
+    pin: D6
+    name: "LIGHT SWITCH"
+    id: switch_D6
+  - platform: gpio
+    pin: D7
+    name: "SUN"
+    id: switch_D7
+  - platform: gpio
+    pin: D8
+    name: "LED"
+    id: switch_D8
+  - platform: gpio
+    pin: TX
+    name: "CHARGER SWITCH"
+    id: switch_tx
+    
+binary_sensor: # Pin or Internal Status -) ESP -) HA
+  - platform: gpio
+    pin: 
+      number: D1
+      mode: 
+        input: True
+        pullup: False   
+    name: "Power Outage"
+    id: outage_d1
+    
+
+interval:
+  - interval: 2sec
+    then:
+      - if:
+          condition: api.connected
+          then:
+            - switch.toggle: internal_led
